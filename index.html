@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Yogi</title>
+
+    <link href="styles/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Titillium+Web:200&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro&display=swap" rel="stylesheet">
+    <link href="styles/styles.css" rel="stylesheet">
+    <link href="styles/animate.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/5a93d3e048.js"></script>
+    <script src="scripts/anime.js"></script>
+
+</head>
+
+<body>
+
+    <section class="title shadow bg-dark text-white" id="main-section" hidden>
+
+        <span class="title-text text-center animated fadeInUp">
+            <h1>Yogi Music</h1>
+            <h2 class="badge badge-primary">ONLINE SHOP</h2>
+        </span>
+        <div id="btn-main">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+
+    </section>
+
+    <main id="main">
+        <nav class="shadow-sm navbar navbar-light bg-light px-5 py-4">
+            <div class="row w-100 d-flex justify-content-between align-items-center">
+                <h3>Yogi Music</h3>
+                <h4><a href="#"><i class="fas fa-shopping-cart text-accent"></i>&nbsp;
+                    </a></h2>
+            </div>
+        </nav>
+        <section class="p-4">
+            <div class="row p-2 pb-0">
+                <div class="col col-12 col-md-6 d-flex align-items-center mb-4">
+                    <span class="font-weight-bold">
+                        (<span id="product-count"></span>&nbsp;Items Available)
+                    </span>&nbsp;
+                    <span class="dropdown mx-2">
+                        <button class="btn btn-light" type="button" id="sortButton" data-toggle="dropdown">
+                            Sort&nbsp;<i class="fas fa-sort"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">Price Ascending</a>
+                            <a class="dropdown-item" href="#">Price Descending</a>
+                        </div>
+                    </span>
+                </div>
+                <div class="col col-12 col-md-6 text-right align-middle mb-4 flex">
+                    <input class="search-input" type="text">
+                </div>
+            </div>
+            <div class="row py-4 align-items-stretch" id="products-container">
+                <div class="text-center w-100">
+                    <div class="spinner-grow text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+</body>
+
+<!-- TODO: Replace with individual firebase things -->
+<script src="https://www.gstatic.com/firebasejs/6.6.1/firebase.js"></script>
+
+<script>
+
+    var firebaseConfig = {
+        apiKey: "AIzaSyBm4rASmuW360UH3P0mYn789IJ-sEKH_FQ",
+        authDomain: "yogi-demo-shop.firebaseapp.com",
+        databaseURL: "https://yogi-demo-shop.firebaseio.com",
+        projectId: "yogi-demo-shop",
+        storageBucket: "yogi-demo-shop.appspot.com",
+        messagingSenderId: "1078011687649",
+        appId: "1:1078011687649:web:82118f16cdedbe9d09bda0"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    let db = firebase.firestore();
+
+    let productsContainer = document.getElementById('products-container');
+
+    let products;
+
+    db.collection('products').get().then(snapshot => {
+        products = snapshot.docs;
+        productsContainer.innerHTML = products.map(productBuilder).join('');
+    })
+
+    document.getElementById('btn-main').onclick = () => {
+        console.log('click');
+
+        document.getElementById('main').removeAttribute('hidden');
+
+        anime({
+            targets: "#main-section",
+            top: ["0%", "-120%"],
+            easing: "easeOutExpo",
+            duration: 1000,
+        })
+
+        anime({
+            targets: "#main",
+            opacity: [0, 1],
+            easing: "easeOutExpo",
+            delay: 500,
+            duration: 1000,
+        })
+    }
+
+    function productBuilder(product) {
+
+        console.log(product);
+
+        let productDetails = product.data();
+        let productId = product.id;
+
+        return `
+            <div class="col-sm-3">
+                <div class="card shadow m-3">
+                    <img src="${productDetails['primary-image']}"
+                        class="card-img-top" />
+                    <div class="card-body text-center">
+                        <h5 class="card-title">${productDetails['short-title']}</h5>
+                        <div>
+                            <a href="product.html?id=${productId}" class="btn btn-primary text-white btn-round">
+                                <i class="fas fa-shopping-cart"></i>&nbsp;Rs. 400
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+</script>
+
+</html>

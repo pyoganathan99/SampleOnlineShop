@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Yogi</title>
+
+    <link href="styles/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Titillium+Web:200&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro&display=swap" rel="stylesheet">
+    <link href="styles/styles.css" rel="stylesheet">
+    <link href="styles/animate.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/5a93d3e048.js"></script>
+    <script src="scripts/anime.js"></script>
+
+</head>
+
+<body>
+
+    <main>
+        <nav class="shadow-sm navbar navbar-light bg-light px-5 py-4">
+            <div class="row w-100 d-flex justify-content-between align-items-center">
+                <h3 class="d-flex align-items-center">
+                    <i class="fas fa-caret-left text-accent"></i>
+                    &nbsp;
+                    Yogi
+                </h3>
+            </div>
+        </nav>
+
+        <section class="m-3 m-md-5">
+            <div class="row">
+                <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2">
+                    <h3>Checkout</h3>
+
+                    <div id="cart-container">
+
+                    </div>
+
+                    <div class="py-5 text-right">
+                        <h3>Grand Total: Rs. <span id="grand-total"></span></h3>
+                        <div class="btn btn-primary my-4">
+                            PROCEED TO PAY
+                            &nbsp;
+                            <i class="fas fa-caret-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</body>
+
+<script src="localStorageController.js"></script>
+
+<!-- TODO: Replace with individual firebase things -->
+<script src="https://www.gstatic.com/firebasejs/6.6.1/firebase.js"></script>
+
+<!-- TODO: Cart empty message -->
+
+<script>
+
+    var firebaseConfig = {
+        apiKey: "AIzaSyBm4rASmuW360UH3P0mYn789IJ-sEKH_FQ",
+        authDomain: "yogi-demo-shop.firebaseapp.com",
+        databaseURL: "https://yogi-demo-shop.firebaseio.com",
+        projectId: "yogi-demo-shop",
+        storageBucket: "yogi-demo-shop.appspot.com",
+        messagingSenderId: "1078011687649",
+        appId: "1:1078011687649:web:82118f16cdedbe9d09bda0"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    function cartItemBuilder(item, index) {
+
+        let productDetails = item.data();
+
+        return `
+            <div class="card shadow mt-5">
+                <div class="row no-gutters align-items-center">
+                    <div class="col-sm-12 col-md-4 p-3">
+                        <img width="100%"
+                            src="${productDetails['primary-image']}" />
+                    </div>
+                    <div class="col-sm-12 col-md-8 p-5">
+                        <h4 class="pb-3">Limited Edition Teminite Tshirt</h4>
+                        <div class="d-flex align-items-baseline pb-3">
+                            <h5 class="pr-3">Rs. ${productDetails['price']} ×</h5>
+                            <input style="width:auto;" type="number" class="form-control" min=1 max=10
+                                value="${productQtys[index]}" id="txt-qty-${index}" onchange="qtyChanged(${index})">
+                        </div>
+                        <h4 class="text-accent font-weight-bold" id="subtotal-${index}">Rs. ${productDetails['price'] * productQtys[index]}</h4>
+                    </div>
+                </div>
+                <div class="item-close-button" onclick="removeItem(${index})">
+                    <i class="fas fa-trash"></i>
+                </div>
+            </div>
+        `;
+    }
+
+    let db = firebase.firestore();
+
+    let cartItems = getAllItemsFromCart();
+    let productIds = Object.keys(cartItems);
+    let productQtys = Object.values(cartItems);
+    let productDetails;
+
+    let cartItemDetails;
+    let grandTotal;
+
+    let productDetailsFetch = productIds.map(e => db.collection('products').doc(e).get());
+
+    Promise.all(productDetailsFetch).then(e => {
+        productDetails = e.map(record => record.data());
+        document.getElementById('cart-container').innerHTML = e.map(cartItemBuilder).join('');
+        updateGrandTotal();
+    });
+
+    function qtyChanged(index) {
+        let productId = productIds[index];
+        let qty = document.getElementById('txt-qty-' + index).value;
+
+        changeQuantityInCart(productId, qty);
+
+        productQtys[index] = qty;
+        document.getElementById('subtotal-' + index).innerHTML = 'Rs. ' + productDetails[index]['price'] * qty;
+
+        updateGrandTotal();
+    }
+
+    function removeItem(index) {
+        let productId = productIds[index];
+        deleteItemFromCart(productId);
+        location.reload();
+    }
+
+    function updateGrandTotal() {
+        grandTotal = 0;
+        for (let i = 0; i < productIds.length; i++) {
+            grandTotal += productDetails[i]['price'] * productQtys[i];
+        }
+
+        document.getElementById('grand-total').innerHTML = grandTotal;
+    }
+
+</script>
+
+</html>

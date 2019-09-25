@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Yogi</title>
+
+    <link href="styles/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Titillium+Web:200&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro&display=swap" rel="stylesheet">
+    <link href="styles/styles.css" rel="stylesheet">
+    <link href="styles/animate.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/5a93d3e048.js"></script>
+    <script src="scripts/anime.js"></script>
+
+</head>
+
+<body>
+
+    <main>
+        <nav class="shadow-sm navbar navbar-light bg-light px-5 py-4">
+            <div class="row w-100 d-flex justify-content-between align-items-center">
+                <h3 class="d-flex align-items-center">
+                    <i class="fas fa-caret-left text-accent"></i>
+                    &nbsp;
+                    Yogi
+                </h3>
+            </div>
+        </nav>
+
+        <section class="m-3 m-md-5">
+            <div class="row">
+                <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2">
+                    <h3 class="mb-3">Shipping details</h3>
+
+                    <form>
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" class="form-control" id="name" />
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email address</label>
+                            <input type="email" class="form-control" id="email" placeholder="abc@gmail.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="address">Shipping address</label>
+                            <textarea id="address" cols="30" rows="3" class="form-control"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Proceed to pay</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</body>
+
+
+
+</html>
