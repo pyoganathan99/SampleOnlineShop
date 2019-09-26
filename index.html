@@ -29,7 +29,7 @@
 
 <body>
 
-    <section class="title shadow bg-dark text-white" id="main-section" hidden>
+    <section class="title shadow bg-dark text-white" id="main-section">
 
         <span class="title-text text-center animated fadeInUp">
             <h1>Yogi Music</h1>
@@ -60,13 +60,13 @@
                             Sort&nbsp;<i class="fas fa-sort"></i>
                         </button>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#">Price Ascending</a>
-                            <a class="dropdown-item" href="#">Price Descending</a>
+                            <a class="dropdown-item" href="#" id="sort-ascending-button">Price Ascending</a>
+                            <a class="dropdown-item" href="#" id="sort-descending-button">Price Descending</a>
                         </div>
                     </span>
                 </div>
                 <div class="col col-12 col-md-6 text-right align-middle mb-4 flex">
-                    <input class="search-input" type="text">
+                    <input class="search-input" type="text" id="search-input">
                 </div>
             </div>
             <div class="row py-4 align-items-stretch" id="products-container">
@@ -84,31 +84,19 @@
 <!-- TODO: Replace with individual firebase things -->
 <script src="https://www.gstatic.com/firebasejs/6.6.1/firebase.js"></script>
 
+<!-- TODO: Product count -->
+
 <script>
 
-    var firebaseConfig = {
-        apiKey: "AIzaSyBm4rASmuW360UH3P0mYn789IJ-sEKH_FQ",
-        authDomain: "yogi-demo-shop.firebaseapp.com",
-        databaseURL: "https://yogi-demo-shop.firebaseio.com",
-        projectId: "yogi-demo-shop",
-        storageBucket: "yogi-demo-shop.appspot.com",
-        messagingSenderId: "1078011687649",
-        appId: "1:1078011687649:web:82118f16cdedbe9d09bda0"
-    };
+    // Weather to show splash screen or not
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
+    if (sessionStorage.getItem('splash')) {
+        document.getElementById('main-section').setAttribute('hidden', true);
+    } else {
+        sessionStorage.setItem('splash', true);
+    }
 
-    let db = firebase.firestore();
-
-    let productsContainer = document.getElementById('products-container');
-
-    let products;
-
-    db.collection('products').get().then(snapshot => {
-        products = snapshot.docs;
-        productsContainer.innerHTML = products.map(productBuilder).join('');
-    })
+    // Splash animation
 
     document.getElementById('btn-main').onclick = () => {
         console.log('click');
@@ -129,6 +117,40 @@
             delay: 500,
             duration: 1000,
         })
+    }
+
+    // Firebase connection
+
+    var firebaseConfig = {
+        apiKey: "AIzaSyBm4rASmuW360UH3P0mYn789IJ-sEKH_FQ",
+        authDomain: "yogi-demo-shop.firebaseapp.com",
+        databaseURL: "https://yogi-demo-shop.firebaseio.com",
+        projectId: "yogi-demo-shop",
+        storageBucket: "yogi-demo-shop.appspot.com",
+        messagingSenderId: "1078011687649",
+        appId: "1:1078011687649:web:82118f16cdedbe9d09bda0"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    let db = firebase.firestore();
+
+    let productsContainer = document.getElementById('products-container');
+
+    let products, displayedProducts;
+
+    db.collection('products').get().then(snapshot => {
+        displayedProducts = products = snapshot.docs;
+        updateUI(products);
+    })
+
+    function updateUI(products) {
+        if (products.length == 0) {
+            productsContainer.innerHTML = `<div class="mx-5">No items found</div>`;
+            return;
+        }
+
+        productsContainer.innerHTML = products.map(productBuilder).join('');
     }
 
     function productBuilder(product) {
@@ -155,6 +177,32 @@
             </div>
         `;
     }
+
+    let searchInput = document.getElementById('search-input');
+
+    searchInput.addEventListener('change', (event) => {
+        displayedProducts = products.filter(e => {
+
+            let productDescription = e.data();
+            let searchTerm = searchInput.value.trim();
+
+            return productDescription['long-title'].includes(searchTerm) ||
+                productDescription['short-title'].includes(searchTerm) ||
+                productDescription['description'].includes(searchTerm);
+
+        });
+        updateUI(displayedProducts);
+    })
+
+    document.getElementById('sort-ascending-button').addEventListener('click', () => {
+        let sortedProducts = displayedProducts.sort((a, b) => a.data()['price'] - b.data()['price']);
+        updateUI(sortedProducts);
+    });
+
+    document.getElementById('sort-descending-button').addEventListener('click', () => {
+        let sortedProducts = displayedProducts.sort((a, b) => b.data()['price'] - a.data()['price']);
+        updateUI(sortedProducts);
+    });
 
 </script>
 
