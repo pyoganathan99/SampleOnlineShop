@@ -49,9 +49,9 @@
 
                     </div>
 
-                    <div class="py-5 text-right">
+                    <div class="py-5 text-right" id="total-container">
                         <h3>Grand Total: Rs. <span id="grand-total"></span></h3>
-                        <div class="btn btn-primary my-4">
+                        <div class="btn btn-primary my-4" id="proceed-button">
                             PROCEED TO PAY
                             &nbsp;
                             <i class="fas fa-caret-right"></i>
@@ -121,16 +121,24 @@
     let productQtys = Object.values(cartItems);
     let productDetails;
 
-    let cartItemDetails;
     let grandTotal;
 
-    let productDetailsFetch = productIds.map(e => db.collection('products').doc(e).get());
+    if (productIds.length == 0) {
 
-    Promise.all(productDetailsFetch).then(e => {
-        productDetails = e.map(record => record.data());
-        document.getElementById('cart-container').innerHTML = e.map(cartItemBuilder).join('');
-        updateGrandTotal();
-    });
+        document.getElementById('total-container').setAttribute('hidden', true);
+        document.getElementById('cart-container').innerHTML = "<span>Cart is empty. Keep shopping!</span>"
+
+    } else {
+
+        let productDetailsFetch = productIds.map(e => db.collection('products').doc(e).get());
+
+        Promise.all(productDetailsFetch).then(e => {
+            productDetails = e.map(record => record.data());
+            document.getElementById('cart-container').innerHTML = e.map(cartItemBuilder).join('');
+            updateGrandTotal();
+        });
+
+    }
 
     function qtyChanged(index) {
         let productId = productIds[index];
@@ -158,6 +166,54 @@
 
         document.getElementById('grand-total').innerHTML = grandTotal;
     }
+
+    function onPayClicked() {
+        if (!window.PaymentRequest) {
+            alert('Your browser does not support the Payment Request API')
+            return;
+        }
+
+        var supportedInstruments = [{
+            supportedMethods: ['basic-card'],
+            data: {
+                supportedNetworks: [
+                    'visa', 'mastercard', 'amex', 'discover',
+                    'diners', 'jcb', 'unionpay'
+                ]
+            }
+        }];
+
+        var details = {
+            displayItems: productDetails.map((product, index) => {
+                return {
+                    label: product['short-title'] + ' × ' + productQtys[index],
+                    amount: { currency: 'INR', value: product['price'] * productQtys[index] }
+                }
+            }),
+            total: {
+                label: 'Total',
+                amount: { currency: 'INR', value: grandTotal }
+            }
+        };
+
+        const options = {
+            requestPayerName: true,
+            requestPayerPhone: true,
+            requestPayerEmail: true,
+        };
+
+        var request = new PaymentRequest(supportedInstruments, details, options);
+
+        request.show()
+            .then(result => {
+                return result.complete('success');
+            }).catch(() => {
+                return result.complete('fail');
+            });
+
+    }
+
+    document.getElementById('proceed-button').addEventListener('click', onPayClicked);
 
 </script>
 
