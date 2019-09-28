@@ -81,10 +81,8 @@
 
 </body>
 
-<!-- TODO: Replace with individual firebase things -->
 <script src="https://www.gstatic.com/firebasejs/6.6.1/firebase.js"></script>
 
-<!-- TODO: Product count -->
 
 <script>
 
@@ -142,7 +140,9 @@
     db.collection('products').get().then(snapshot => {
         displayedProducts = products = snapshot.docs;
         updateUI(products);
-    })
+    }).catch((err) => {
+        alert('Unfortunately, something went wrong. Please try again');
+    });
 
     function updateUI(products) {
         if (products.length == 0) {

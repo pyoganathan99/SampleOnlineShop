@@ -70,7 +70,6 @@
 
 <script src="localStorageController.js"></script>
 
-<!-- TODO: Replace with individual firebase things -->
 <script src="https://www.gstatic.com/firebasejs/6.6.1/firebase.js"></script>
 
 <script>
@@ -100,7 +99,7 @@
                             src="${productDetails['primary-image']}" />
                     </div>
                     <div class="col-sm-12 col-md-8 p-5">
-                        <h4 class="pb-3">Limited Edition Teminite Tshirt</h4>
+                        <h4 class="pb-3">${productDetails['long-title']}</h4>
                         <div class="d-flex align-items-baseline pb-3">
                             <h5 class="pr-3">Rs. ${productDetails['price']} ×</h5>
                             <input style="width:auto;" type="number" class="form-control" min=1 max=10
@@ -138,6 +137,8 @@
             productDetails = e.map(record => record.data());
             document.getElementById('cart-container').innerHTML = e.map(cartItemBuilder).join('');
             updateGrandTotal();
+        }).catch((err) => {
+            alert('Unfortunately, something went wrong. Please try again');
         });
 
     }
